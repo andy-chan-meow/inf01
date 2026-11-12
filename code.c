@@ -67,7 +67,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
         //команды, выполняемые процессором
         case 0: // остановка программы
             cpu_state[4] = 1;
-            printf("Command 0: Stopped\n");
+            printf("pc=%d: Command 0: Stopped\n",pc);
             break;
 
         case 1: //загрузка значения в аккумулятор
