@@ -83,6 +83,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
         case 3: //деление аккумулятора на значение из ячейки памяти
             if (value == 0){//проверка на деление на 0
                 cpu_state[5] = 3;//ошибка деления на 0
+                cpu_state[0] = cpu_state[3];
                 printf("Interruption: Null division at the cell memory[%d], transition to %d\n", operand, cpu_state[3]);
             } else {
                 cpu_state[1] /= value;
