@@ -67,18 +67,18 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
         //команды, выполняемые процессором
         case 0: // остановка программы
             cpu_state[4] = 1;
-            printf("Stopped\n");
+            printf("Command 0: Stopped\n");
             break;
 
         case 1: //загрузка значения в аккумулятор
             cpu_state[1] = value;   
-            printf("pc=%d: Command 1 (Loading), operand=%d, value = %d, acc=%d\n", pc, operand,value, cpu_state[1]);          
+            printf("pc=%d: Command 1 (Loading), operand=%d, value = %d, acc=%d, pc += 2\n", pc, operand,value, cpu_state[1]);          
             cpu_state[0] += 2 ; //переходим на 2 ячейки так как оператор + операнд занимают 2 ячейки    
             break;
 
         case 2: //умножение аккумулятора на значение из ячейки памяти
             cpu_state[1] *= value; 
-            printf("pc=%d: Command 2 (Multiple), operand=%d, value = %d,  acc=%d\n", pc, operand, value, cpu_state[1]);
+            printf("pc=%d: Command 2 (Multiple), operand=%d, value = %d,  acc=%d, pc += 2\n", pc, operand, value, cpu_state[1]);
             cpu_state[0] += 2 ; //переходим на 2 ячейки так как оператор + операнд занимают 2 ячейки 
             break;
 
@@ -89,7 +89,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
                 printf("Interruption: Null division at the cell memory[%d], transition to %d\n", operand, cpu_state[3]);
             } else {
                 cpu_state[1] /= value;
-                  printf("pc=%d: Command 3 (Division), operand=%d, value = %d acc=%d\n", pc, operand,value, cpu_state[1]);
+                  printf("pc=%d: Command 3 (Division), operand=%d, value = %d, acc=%d, pc += 2\n", pc, operand,value, cpu_state[1]);
                 cpu_state[0] += 2 ; //переходим на 2 ячейки так как оператор + операнд занимают 2 ячейки 
             }
             break;
@@ -103,7 +103,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
              if (cpu_state[1] == 0){//если в аккумуляторе 0, то переходим на адрес operand 
                 cpu_state[0] = operand;
             } else {//пропускаем, если не 0
-                printf("pc=%d: Command 5 (JUMPZ) -> acc!=0 (%d), Ignore transition\n", pc, cpu_state[1]);
+                printf("pc=%d: Command 5 (JUMPZ) -> acc!=0 (%d), Ignore transition, pc += 2\n", pc, cpu_state[1]);
                 cpu_state[0] += 2;
             }
             break;
@@ -114,8 +114,6 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
             printf("Error: Unknown opcode %d at address %d\n", opcode, pc);
             break;
         }
-
-        
     }
     //итоговое состояние процессора
     printf("Programm finished:\n");
