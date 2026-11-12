@@ -8,7 +8,7 @@ int cpu_state[8] = { 0, 0, 0, 0, 0 ,0 ,0, 0};
 pc - 0
 acc - 1
 ir - 2
-break vector - 3 
+break vector - 3  
 stop flag - 4
 error code - 5
 */
@@ -106,7 +106,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
             break;
 
         default:
-            cpu_state[5] = 1;//ошибка неизвестного опкода
+            cpu_state[5] = 2;//ошибка неизвестного опкода
             cpu_state[0] = cpu_state[3];
             printf("Error: Unknown opcode %d at address %d\n", opcode, pc);
             break;
