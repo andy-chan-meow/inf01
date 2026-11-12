@@ -59,6 +59,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
                 cpu_state[5] = 1;//ошибка адресации 
                 cpu_state[0] = cpu_state[3];
                 printf("Error: Out of bounds memory access\nInterruption: Memory addressing error at address %d\n", operand);
+                continue;
             }
     int value = memory[operand];//значение ячейки-операнда
     
