@@ -31,16 +31,16 @@ cpu_state[4] = 0;//нет флагов остановки
 cpu_state[5] = 0;//нет ошибок
 
 while (cpu_state[4] == 0){//выполняется пока нет стоп флагов
+    if (cpu_state[0] == cpu_state[3]){//если во время работы появилась ошибка
+            break;
+        }
     int pc  = cpu_state[0];
     
     if(pc < 0 || pc >= 256){// проверяем не вышел ли счетчик за пределы памяти
             cpu_state[5] = 1;//ошибка адресации 
             printf("Error: Out of bounds memory access\nInterruption: Memory addressing error at address %d\n", pc);
             cpu_state[0] = cpu_state[3];//прерываем процесс
-            if (cpu_state[0] == pc){//защита от бесконечных циклов
-                printf("Error: cpu_state[3] in the loop\n");
-                break;
-            }
+            
             continue;
         }   
         //чтение текуещй команды
@@ -55,12 +55,13 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
         continue;
     }
     int operand = memory[pc + 1]; //после ячейки оператора идет ячейка операнда, поэтому адрес на 1 больше
-    int value = memory[operand];//значение ячейки-операнда
     if(operand < 0 || operand >= 256){//проверка адреса операнда на выход за пределы памяти
                 cpu_state[5] = 1;//ошибка адресации 
                 cpu_state[0] = cpu_state[3];
                 printf("Error: Out of bounds memory access\nInterruption: Memory addressing error at address %d\n", operand);
             }
+    int value = memory[operand];//значение ячейки-операнда
+    
     switch(opcode){
         //команды, выполняемые процессором
         case 0: // остановка программы
@@ -113,9 +114,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
             break;
         }
 
-        if (cpu_state[0] == cpu_state[3]){//если во время работы появилась ошибка
-            break;
-        }
+        
     }
     //итоговое состояние процессора
     printf("Programm finished:\n");
