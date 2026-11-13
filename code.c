@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 int main(){
-
-int memory[256] = {0};
-int cpu_state[8] = { 0, 0, 0, 0, 0 ,0 ,0, 0};
+//1. Принцип однородности памяти: один массив памяти для машинных инструкций, обрабатываемых данных и системных векторов. Для процессора все числа
+int memory[256];
+int cpu_state[8];
 /*
 pc - 0
 acc - 1
@@ -13,28 +13,30 @@ stop flag - 4
 error code - 5
 */
 
-FILE *file = fopen("program.txt","r");//читаем файл
+FILE *file = fopen("program.txt","r");//читаем данные из файла (ввод)
 if (file == NULL) {
     printf("Error: Failed to open program.txt\n");//если файл пустой возвращаем 1
     return 1;
 }
-
+//2. Принцип адресации: память состоит из пронумерованных ячеек, к которым процессор обращается по адресам
 int address = 0;//начинаем считывать числа из файла
 while(address < 256 && fscanf(file, "%d", &memory[address]) == 1){
     address++;
 }
 fclose(file);//закрываем файл
 
+//Инициализируем регистры процессора
 cpu_state[0] = 1;//счетчик команд
 cpu_state[3] = memory[0];//записываем вектор прерывания
 cpu_state[4] = 0;//нет флагов остановки
 cpu_state[5] = 0;//нет ошибок
 
+//3. Принцип последовательного программного управления 
 while (cpu_state[4] == 0){//выполняется пока нет стоп флагов
     if (cpu_state[0] == cpu_state[3]){//если во время работы появилась ошибка
             break;
         }
-    int pc  = cpu_state[0];
+    int pc  = cpu_state[0];//процессор считывает адрес команды из счетчика
     
     if(pc < 0 || pc >= 256){// проверяем не вышел ли счетчик за пределы памяти
             cpu_state[5] = 1;//ошибка адресации 
@@ -43,7 +45,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
             
             continue;
         }   
-        //чтение текуещй команды
+        //чтение текущей команды
     cpu_state[2] = memory[pc];
     int opcode =  cpu_state[2];
 
@@ -63,8 +65,10 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
             }
     int value = memory[operand];//значение ячейки-операнда
     
+    //Расшифровка опкода, выполнение заданной инструкции и обновление счетчика процессов 
     switch(opcode){
-        //команды, выполняемые процессором
+                    //команды, выполняемые процессором
+
         case 0: // остановка программы
             cpu_state[4] = 1;
             printf("pc=%d: Command 0: Stopped\n",pc);
@@ -79,7 +83,7 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
         case 2: //умножение аккумулятора на значение из ячейки памяти
             cpu_state[1] *= value; 
             printf("pc=%d: Command 2 (Multiple), operand=%d, value = %d,  acc=%d, pc += 2\n", pc, operand, value, cpu_state[1]);
-            cpu_state[0] += 2 ; //переходим на 2 ячейки так как оператор + операнд занимают 2 ячейки 
+            cpu_state[0] += 2 ; 
             break;
 
         case 3: //деление аккумулятора на значение из ячейки памяти
@@ -90,25 +94,26 @@ while (cpu_state[4] == 0){//выполняется пока нет стоп фл
             } else {
                 cpu_state[1] /= value;
                   printf("pc=%d: Command 3 (Division), operand=%d, value = %d, acc=%d, pc += 2\n", pc, operand,value, cpu_state[1]);
-                cpu_state[0] += 2 ; //переходим на 2 ячейки так как оператор + операнд занимают 2 ячейки 
+                cpu_state[0] += 2 ; 
             }
             break;
 
-        case 4://JUMP
-            printf("pc=%d: Command 4 (JUMP) -> come to address %d\n", pc, operand);
+        case 4://JUMP (безусловный переход)
+            printf("pc=%d: Command 4 (JUMP), come to address %d\n", pc, operand);
             cpu_state[0] = operand;
             break;
 
-        case 5: //JUMPZ
+        case 5: //JUMPZ (условный переход)
              if (cpu_state[1] == 0){//если в аккумуляторе 0, то переходим на адрес operand 
+                printf("pc=%d: Command 5 (JUMPZ), acc == 0, come to address %d\n", pc, operand);
                 cpu_state[0] = operand;
             } else {//пропускаем, если не 0
-                printf("pc=%d: Command 5 (JUMPZ) -> acc!=0 (%d), Ignore transition, pc += 2\n", pc, cpu_state[1]);
+                printf("pc=%d: Command 5 (JUMPZ), acc!=0 (%d), Ignore transition, pc += 2\n", pc, cpu_state[1]);
                 cpu_state[0] += 2;
             }
             break;
 
-        default:
+        default://если в cpu_state[2] передан несуществующий опкод
             cpu_state[5] = 2;//ошибка неизвестного опкода
             cpu_state[0] = cpu_state[3];
             printf("Error: Unknown opcode %d at address %d\n", opcode, pc);
